@@ -16,7 +16,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const login = (username: string, password: string): boolean => {
         if (username === 'admin' && password === 'admin') {
             setUser(username);
-            navigate('/');
+            navigate('/home');
             return true;
         }
         return false;
