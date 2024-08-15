@@ -50,9 +50,8 @@ const Home: React.FC = () => {
     const handleViewDetails = (eventId: number) => {
         navigate(`/eventos/${eventId}`);
     };
-
-    const handleEditEvent = (event: Event) => {
-        // Lógica para editar o evento (pode ser implementada de forma semelhante ao handleAddEvent)
+    const handleEditEvent = (eventId: number) => {
+        navigate(`/eventos/${eventId}/editar`);
     };
 
     return (
