@@ -26,16 +26,16 @@ const Home: React.FC = () => {
         }
 
         if (eventBeingEdited !== null) {
-            // Atualizar evento existente
-            updateEvent(eventBeingEdited, {
+            const updatedEvent = {
                 id: eventBeingEdited,
                 name: newEventName,
                 startDate: newEventStartDate,
                 endDate: newEventEndDate,
                 items: events.find(event => event.id === eventBeingEdited)?.items || [],
-            });
+            };
+        
+            updateEvent(updatedEvent); 
         } else {
-            // Adicionar novo evento
             const newEvent = {
                 id: events.length + 1,
                 name: newEventName,
@@ -45,6 +45,7 @@ const Home: React.FC = () => {
             };
             addEvent(newEvent);
         }
+        
 
         // Resetar o estado
         setNewEventName('');
