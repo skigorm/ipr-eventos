@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Modal from 'react-modal';
 import { useAuth } from '../../providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
-import { useEvent } from '../../providers/EventProvider'; // Importe o useEvent
+import { useEvent } from '../../providers/EventProvider';
 import { styles, customModalStyles } from './HomeStyles';
 import { FaCalendarAlt, FaPlus, FaEye, FaEdit, FaTrash } from 'react-icons/fa';
 
@@ -11,12 +11,13 @@ Modal.setAppElement('#root');
 const Home: React.FC = () => {
     const auth = useAuth();
     const navigate = useNavigate();
-    const { events, addEvent, deleteEvent } = useEvent(); // Usando o contexto de eventos
+    const { events, addEvent, deleteEvent, updateEvent } = useEvent(); // Usando updateEvent para atualizar eventos
     const [newEventName, setNewEventName] = useState('');
     const [newEventStartDate, setNewEventStartDate] = useState('');
     const [newEventEndDate, setNewEventEndDate] = useState('');
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [error, setError] = useState('');
+    const [eventBeingEdited, setEventBeingEdited] = useState<number | null>(null); // Novo estado para identificar o evento em edição
 
     const handleAddEvent = () => {
         if (!newEventName || !newEventStartDate || !newEventEndDate) {
@@ -24,19 +25,34 @@ const Home: React.FC = () => {
             return;
         }
 
-        const newEvent = {
-            id: events.length + 1,
-            name: newEventName,
-            startDate: newEventStartDate,
-            endDate: newEventEndDate,
-            items: [], // Inicialmente, nenhum item está associado ao evento
-        };
-        addEvent(newEvent);
+        if (eventBeingEdited !== null) {
+            // Atualizar evento existente
+            updateEvent(eventBeingEdited, {
+                id: eventBeingEdited,
+                name: newEventName,
+                startDate: newEventStartDate,
+                endDate: newEventEndDate,
+                items: events.find(event => event.id === eventBeingEdited)?.items || [],
+            });
+        } else {
+            // Adicionar novo evento
+            const newEvent = {
+                id: events.length + 1,
+                name: newEventName,
+                startDate: newEventStartDate,
+                endDate: newEventEndDate,
+                items: [],
+            };
+            addEvent(newEvent);
+        }
+
+        // Resetar o estado
         setNewEventName('');
         setNewEventStartDate('');
         setNewEventEndDate('');
         setModalIsOpen(false);
         setError('');
+        setEventBeingEdited(null);
     };
 
     const handleDeleteEvent = (eventId: number) => {
@@ -50,8 +66,16 @@ const Home: React.FC = () => {
     const handleViewDetails = (eventId: number) => {
         navigate(`/eventos/${eventId}`);
     };
+
     const handleEditEvent = (eventId: number) => {
-        navigate(`/eventos/${eventId}/editar`);
+        const event = events.find(event => event.id === eventId);
+        if (event) {
+            setNewEventName(event.name);
+            setNewEventStartDate(event.startDate);
+            setNewEventEndDate(event.endDate);
+            setEventBeingEdited(eventId);
+            setModalIsOpen(true);
+        }
     };
 
     return (
@@ -75,7 +99,7 @@ const Home: React.FC = () => {
                             <tr key={event.id} style={styles.tableRow}>
                                 <td style={styles.tableCell}>
                                     <div style={styles.eventDetails}>
-                                        <FaCalendarAlt style={styles.icon} /> {/* Ícone do evento */}
+                                        <FaCalendarAlt style={styles.icon} />
                                         <span>{event.name}</span>
                                     </div>
                                 </td>
@@ -100,7 +124,7 @@ const Home: React.FC = () => {
                                     </button>
                                     <button
                                         style={styles.actionButton}
-                                        onClick={() => handleEditEvent(event.id)} 
+                                        onClick={() => handleEditEvent(event.id)}
                                     >
                                         <FaEdit /> Editar
                                     </button>
@@ -121,11 +145,14 @@ const Home: React.FC = () => {
 
             <Modal
                 isOpen={modalIsOpen}
-                onRequestClose={() => setModalIsOpen(false)}
-                contentLabel="Criar Novo Evento"
+                onRequestClose={() => {
+                    setModalIsOpen(false);
+                    setEventBeingEdited(null); // Reseta o estado ao fechar a modal
+                }}
+                contentLabel={eventBeingEdited !== null ? "Editar Evento" : "Criar Novo Evento"}
                 style={customModalStyles}
             >
-                <h3 style={styles.formTitle}>Cadastrar Novo Evento</h3>
+                <h3 style={styles.formTitle}>{eventBeingEdited !== null ? "Editar Evento" : "Cadastrar Novo Evento"}</h3>
                 {error && <p style={styles.error}>{error}</p>}
                 <input
                     type="text"
@@ -157,7 +184,7 @@ const Home: React.FC = () => {
                     </div>
                 </div>
                 <button onClick={handleAddEvent} style={styles.addButton}>
-                    Adicionar Evento
+                    {eventBeingEdited !== null ? "Salvar Alterações" : "Adicionar Evento"}
                 </button>
             </Modal>
         </div>

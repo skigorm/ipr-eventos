@@ -44,7 +44,7 @@ const EventDetails: React.FC = () => {
 
             <button
                 style={styles.backButton}
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/home')}
             >
                 Voltar para Home
             </button>
