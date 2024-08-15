@@ -100,7 +100,7 @@ const Home: React.FC = () => {
                                     </button>
                                     <button
                                         style={styles.actionButton}
-                                        onClick={() => handleEditEvent(event)}
+                                        onClick={() => handleEditEvent(event.id)} 
                                     >
                                         <FaEdit /> Editar
                                     </button>
